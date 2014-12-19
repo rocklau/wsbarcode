@@ -4,9 +4,12 @@ import (
 	"flag"
 	"fmt"
 	"github.com/Banrai/PiScan/scanner"
-	"github.com/Unknwon/macaron"  
-	"log"
+
+	"github.com/Unknwon/macaron"
+	//"log"
 )
+
+var Printcode string
 
 func main() {
 	var (
@@ -16,23 +19,25 @@ func main() {
 	flag.StringVar(&device, "device", scanner.SCANNER_DEVICE, fmt.Sprintf("The '/dev/input/event' device associated with your scanner (defaults to '%s')", scanner.SCANNER_DEVICE))
 
 	processScanFn := func(barcode string) {
-
-		println(barcode)
-
+		fmt.Println("newcode:" + barcode)
+		Printcode = barcode
 	}
 
 	errorFn := func(e error) {
-		log.Fatal(e)
+		fmt.Println(e)
 	}
+	fmt.Println("capturing barcode scanner")
+	go scanner.ScanForever(device, processScanFn, errorFn)
 
-	scanner.ScanForever(device, processScanFn, errorFn)
-
+	fmt.Println("web server running")
+	Printcode = "test"
 	m := macaron.New()
-
 	m.Get("/", func() string {
-		println("hello world")
-		return "hello world" // HTTP 200 : "hello world"
+		pcode := Printcode
+		Printcode = ""
+		return pcode // HTTP 200 : "hello world"
 	})
 
 	m.Run()
+
 }
