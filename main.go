@@ -57,7 +57,7 @@ func worker(start chan bool) {
 }
 
 func main() {
-	m := macaron.Classic()
+	m := macaron.New()
 	//macaron web test ui
 	m.Get("/", func() string {
 		return `<html><body><script src='//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'></script>
