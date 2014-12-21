@@ -32,10 +32,9 @@ func main() {
 	fmt.Println("web server running")
 	Printcode = "test"
 	m := macaron.New()
-	m.Get("/", func() string {
-		pcode := Printcode
+	m.Get("/", func() (string barcode) {
+		barcode = Printcode
 		Printcode = ""
-		return pcode // HTTP 200 : "hello world"
 	})
 
 	m.Run()
