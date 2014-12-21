@@ -136,9 +136,10 @@ func main() {
 	fmt.Println("web server running")
 	Printcode = "test"
  
-	m.Get("/httpbarcode", func() (string barcode) {
+	m.Get("/httpbarcode", func() (barcode string) {
 		barcode = Printcode
 		Printcode = ""
+		return
 	})
 
 	m.Run()
