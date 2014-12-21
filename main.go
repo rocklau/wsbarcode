@@ -64,7 +64,7 @@ func main() {
 		return `<html><body><script src='//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'></script>
     <ul id=messages></ul><form><input id=message><input type="submit" id=send value=Send></form>
     <script>
-    var c=new WebSocket('ws://localhost:4000/sock');
+    var c=new WebSocket('ws://localhost:4000/wsbarcode');
     c.onopen = function(){
       c.onmessage = function(response){
         console.log(response.data);
