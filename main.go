@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/Banrai/PiScan/scanner" 
+	"github.com/Banrai/PiScan/scanner"
 	"github.com/Unknwon/macaron"
 	"github.com/gorilla/websocket"
 	"log"
@@ -14,8 +14,6 @@ import (
 )
 
 var Printcode string
- 
- 
 
 var ActiveClients = make(map[ClientConn]int)
 var ActiveClientsRWMutex sync.RWMutex
@@ -60,27 +58,30 @@ func worker(start chan bool) {
 
 func main() {
 	m := macaron.Classic()
+	//macaron web test ui
 	m.Get("/", func() string {
 		return `<html><body><script src='//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'></script>
-    <ul id=messages></ul><form><input id=message><input type="submit" id=send value=Send></form>
-    <script>
-    //replace http to ws
-    var c=new WebSocket(window.location.origin.replace(window.location.protocol,"ws:") + '/wsbarcode');
-    c.onopen = function(){
-      c.onmessage = function(response){
-        console.log(response.data);
-        var newMessage = $('<li>').text(response.data);
-        $('#messages').append(newMessage);
-        $('#message').val('');
-      };
-      $('form').submit(function(){
-        c.send($('#message').val());
-        return false;
-      });
-    }
-    </script></body></html>`
+			    <ul id=messages></ul><form><input id=message><input type="submit" id=send value=Send></form>
+			    <script>
+			    //replace http to ws
+			    var c=new WebSocket(window.location.origin.replace(window.location.protocol,"ws:") + '/wsbarcode');
+			    c.onopen = function(){
+			      c.onmessage = function(response){
+			        console.log(response.data);
+			        var newMessage = $('<li>').text(response.data);
+			        $('#messages').append(newMessage);
+			        $('#message').val('');
+			      };
+			      $('form').submit(function(){
+			        c.send($('#message').val());
+			        return false;
+			      });
+			    }
+			    </script></body></html>`
 	})
-
+    
+	
+	//macaron websocket api
 	m.Get("/wsbarcode", func(w http.ResponseWriter, r *http.Request) {
 		log.Println(ActiveClients)
 		ws, err := websocket.Upgrade(w, r, nil, 1024, 1024)
@@ -113,9 +114,8 @@ func main() {
 
 	startheartbeat := make(chan bool)
 	go worker(startheartbeat)
- 
-
- 
+	
+	//barcode scanner init
 	var (
 		device string
 	)
@@ -124,8 +124,8 @@ func main() {
 
 	processScanFn := func(barcode string) {
 		fmt.Println("newcode:" + barcode)
-		Printcode = barcode
-		broadcastMessage(websocket.TextMessage, []byte(barcode))
+		Printcode = barcode //to http api
+		broadcastMessage(websocket.TextMessage, []byte(barcode)) //to websocket api
 	}
 
 	errorFn := func(e error) {
@@ -134,9 +134,9 @@ func main() {
 	fmt.Println("capturing barcode scanner")
 	go scanner.ScanForever(device, processScanFn, errorFn)
 
+        //macaron http api
 	fmt.Println("web server running")
-	Printcode = "test"
- 
+	Printcode = ""  
 	m.Get("/httpbarcode", func() (barcode string) {
 		barcode = Printcode
 		Printcode = ""
